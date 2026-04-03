@@ -1,21 +1,17 @@
-name: Buduj EXE dla Windows
+name: Buduj EXE
 
-on: 
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Pobieranie kodu
-      uses: actions/checkout@v4
-
-    - name: Kompilacja programu C#
-      run: csc /out:MojProgram.exe Program.cs
-
-    - name: Udostepnij plik EXE
+    - uses: actions/checkout@v4
+    - name: Kompilacja
+      run: |
+        dir
+        csc /out:MojProgram.exe *.cs
+    - name: Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Program_Windows
