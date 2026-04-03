@@ -9,12 +9,14 @@ jobs:
     - name: Pobieranie kodu
       uses: actions/checkout@v4
 
-    - name: Konfiguracja narzedzi MSBuild (Kompilator)
+    - name: Konfiguracja MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Kompilacja programu
+    - name: Kompilacja w srodowisku Developer Shell
       shell: cmd
-      run: csc /out:MojProgram.exe Program.cs
+      run: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+        csc /out:MojProgram.exe Program.cs
 
     - name: Udostepnij gotowy plik
       uses: actions/upload-artifact@v4
