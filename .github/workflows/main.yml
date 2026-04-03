@@ -1,4 +1,4 @@
-name: Buduj Kosztorys EXE
+name: Buduj Testowy EXE
 
 on: [push, workflow_dispatch]
 
@@ -6,20 +6,20 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Pobieranie kodu z repozytorium
+    - name: Pobieranie kodu
       uses: actions/checkout@v4
 
-    - name: Konfiguracja narzedzi MSBuild
+    - name: Konfiguracja MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Kompilacja programu okienkowego
+    - name: Kompilacja
       shell: cmd
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-        csc /target:winexe /out:Kosztorys.exe Program.cs
+        csc /out:TestowyProgram.exe Program.cs
 
-    - name: Udostepnij gotowy plik do pobrania
+    - name: Udostepnij plik
       uses: actions/upload-artifact@v4
       with:
-        name: Program_Kosztorys
-        path: Kosztorys.exe
+        name: Paczka_Testowa
+        path: TestowyProgram.exe
