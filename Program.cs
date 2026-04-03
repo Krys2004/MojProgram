@@ -1,48 +1,65 @@
 using System;
+using System.Windows.Forms;
+using System.Drawing;
 using System.IO;
 
-class Program {
-    static void Main() {
-        Console.Title = "Generator Kosztorysu";
-        Console.WriteLine("=== GENERATOR KOSZTORYSU ===");
+public class KosztorysForm : Form {
+    private TextBox txtProjekt, txtUsluga, txtCena;
+    private Button btnGeneruj;
 
-        // Pobieranie danych od użytkownika
-        Console.Write("Podaj nazwe projektu: ");
-        string projekt = Console.ReadLine();
+    public KosztorysForm() {
+        this.Text = "Generator Kosztorysu v1.0";
+        this.Size = new Size(350, 300);
+        this.StartPosition = FormStartPosition.CenterScreen;
+        this.FormBorderStyle = FormBorderStyle.FixedSingle;
 
-        Console.Write("Podaj nazwe uslugi: ");
-        string usluga = Console.ReadLine();
+        // Etykiety i pola tekstowe
+        Label lbl1 = new Label() { Text = "Nazwa projektu:", Left = 20, Top = 20, Width = 200 };
+        txtProjekt = new TextBox() { Left = 20, Top = 40, Width = 280 };
 
-        Console.Write("Podaj kwote (PLN): ");
-        string kwota = Console.ReadLine();
+        Label lbl2 = new Label() { Text = "Opis usługi:", Left = 20, Top = 70, Width = 200 };
+        txtUsluga = new TextBox() { Left = 20, Top = 90, Width = 280 };
 
-        // Lokalizacja Pulpitu
-        string pulpit = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        string nazwaPliku = "Kosztorys_" + DateTime.Now.ToString("yyyyMMdd_HHmm") + ".txt";
-        string sciezka = Path.Combine(pulpit, nazwaPliku);
+        Label lbl3 = new Label() { Text = "Cena (PLN):", Left = 20, Top = 120, Width = 200 };
+        txtCena = new TextBox() { Left = 20, Top = 140, Width = 280 };
 
-        // Treść kosztorysu
-        string tresc = "==============================\n" +
-                       "       KOSZTORYS PROJEKTU     \n" +
-                       "==============================\n" +
-                       "Data wystawienia: " + DateTime.Now.ToString() + "\n" +
-                       "Nazwa projektu:   " + projekt + "\n" +
-                       "------------------------------\n" +
-                       "Opis uslugi:      " + usluga + "\n" +
-                       "Wartosc:          " + kwota + " PLN\n" +
-                       "==============================\n" +
-                       "Wygenerowano przez: MojProgram.exe";
+        // Przycisk
+        btnGeneruj = new Button() { 
+            Text = "ZAPISZ KOSZTORYS NA PULPICIE", 
+            Left = 20, Top = 190, Width = 280, Height = 40,
+            BackColor = Color.LightGreen 
+        };
+        btnGeneruj.Click += BtnGeneruj_Click;
 
+        this.Controls.Add(lbl1); this.Controls.Add(txtProjekt);
+        this.Controls.Add(lbl2); this.Controls.Add(txtUsluga);
+        this.Controls.Add(lbl3); this.Controls.Add(txtCena);
+        this.Controls.Add(btnGeneruj);
+    }
+
+    private void BtnGeneruj_Click(object sender, EventArgs e) {
         try {
-            File.WriteAllText(sciezka, tresc);
-            Console.WriteLine("\n[SUKCES] Plik zostal zapisany na pulpicie!");
-            Console.WriteLine("Nazwa pliku: " + nazwaPliku);
-            Console.WriteLine("\nAby zrobic PDF: Otworz ten plik i wybierz Plik -> Drukuj -> Microsoft Print to PDF.");
-        } catch (Exception e) {
-            Console.WriteLine("\n[BLAD] Nie udalo sie zapisac pliku: " + e.Message);
-        }
+            string pulpit = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string sciezka = Path.Combine(pulpit, "Kosztorys_" + txtProjekt.Text + ".txt");
 
-        Console.WriteLine("\nNacisnij ENTER, aby zakonczyc...");
-        Console.ReadLine();
+            string tresc = $"KOSZTORYS\n" +
+                           $"Data: {DateTime.Now}\n" +
+                           $"Projekt: {txtProjekt.Text}\n" +
+                           $"Usługa: {txtUsluga.Text}\n" +
+                           $"Suma: {txtCena.Text} PLN\n" +
+                           $"--------------------------\n" +
+                           $"Wygenerowano automatycznie.";
+
+            File.WriteAllText(sciezka, tresc);
+            MessageBox.Show("Sukces! Kosztorys znajdziesz na pulpicie.\n\nMożesz go teraz wydrukować do PDF.", "Zapisano");
+        } catch (Exception ex) {
+            MessageBox.Show("Błąd: " + ex.Message);
+        }
+    }
+
+    [STAThread]
+    static void Main() {
+        Application.EnableVisualStyles();
+        Application.Run(new KosztorysForm());
     }
 }
