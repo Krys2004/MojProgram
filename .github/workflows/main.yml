@@ -1,4 +1,4 @@
-name: Buduj Kosztorys
+name: Buduj Kosztorys OKIENKOWY
 
 on: [push, workflow_dispatch]
 
@@ -12,14 +12,14 @@ jobs:
     - name: Konfiguracja MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Kompilacja EXE
+    - name: Kompilacja GUI EXE
       shell: cmd
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-        csc /out:Kosztorys.exe Program.cs
+        csc /target:winexe /out:KosztorysOkienko.exe Program.cs
 
     - name: Udostepnij plik
       uses: actions/upload-artifact@v4
       with:
-        name: Aplikacja_Kosztorys
-        path: Kosztorys.exe
+        name: Kosztorys_Gotowy
+        path: KosztorysOkienko.exe
