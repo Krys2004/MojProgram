@@ -19,11 +19,10 @@ public class KosztorysApp : Form {
     private TextBox txtNazwa, txtCena, txtIlosc;
 
     public KosztorysApp() {
-        this.Text = "Pro Generator Kosztorysów v2.0";
-        this.Size = new Size(600, 500);
+        this.Text = "Pro Generator Kosztorysów - Stabilny";
+        this.Size = new Size(620, 500);
         this.StartPosition = FormStartPosition.CenterScreen;
 
-        // Panel wprowadzania
         Label lbl1 = new Label() { Text = "Urządzenie:", Left = 10, Top = 10, Width = 80 };
         txtNazwa = new TextBox() { Left = 100, Top = 10, Width = 150 };
 
@@ -33,22 +32,20 @@ public class KosztorysApp : Form {
         Label lbl3 = new Label() { Text = "Ilość:", Left = 410, Top = 10, Width = 40 };
         txtIlosc = new TextBox() { Left = 460, Top = 10, Width = 30 };
 
-        Button btnDodaj = new Button() { Text = "DODAJ", Left = 500, Top = 8, Width = 70 };
+        Button btnDodaj = new Button() { Text = "DODAJ", Left = 500, Top = 8, Width = 80 };
         btnDodaj.Click += (s, e) => DodajUrzadzenie();
 
-        // Tabela
-        grid = new DataGridView() { Left = 10, Top = 50, Width = 560, Height = 300, ReadOnly = true };
+        grid = new DataGridView() { Left = 10, Top = 50, Width = 580, Height = 300, ReadOnly = true, AllowUserToAddRows = false };
         grid.ColumnCount = 5;
         grid.Columns[0].Name = "Nazwa";
-        grid.Columns[1].Name = "Cena Netto";
+        grid.Columns[1].Name = "Netto";
         grid.Columns[2].Name = "Ilość";
         grid.Columns[3].Name = "Suma Netto";
-        grid.Columns[4].Name = "Suma Brutto (23%)";
+        grid.Columns[4].Name = "Suma Brutto";
 
-        // Przycisk Zapisu
         Button btnExport = new Button() { 
-            Text = "GENERUJ DOKUMENT PDF (HTML)", 
-            Left = 10, Top = 370, Width = 560, Height = 50, 
+            Text = "GENERUJ KOSZTORYS (HTML/PDF)", 
+            Left = 10, Top = 370, Width = 580, Height = 50, 
             BackColor = Color.Gold, Font = new Font(this.Font, FontStyle.Bold) 
         };
         btnExport.Click += (s, e) => EksportujDoHTML();
@@ -60,37 +57,38 @@ public class KosztorysApp : Form {
         try {
             var u = new Urzadzenie {
                 Nazwa = txtNazwa.Text,
-                CenaNetto = decimal.Parse(txtCena.Text),
+                CenaNetto = decimal.Parse(txtCena.Text.Replace(".", ",")),
                 Ilosc = int.Parse(txtIlosc.Text)
             };
             lista.Add(u);
             grid.Rows.Add(u.Nazwa, u.CenaNetto, u.Ilosc, u.SumaNetto, u.SumaBrutto.ToString("F2"));
             txtNazwa.Clear(); txtCena.Clear(); txtIlosc.Clear();
+            txtNazwa.Focus();
         } catch { MessageBox.Show("Wpisz poprawne liczby!"); }
     }
 
     private void EksportujDoHTML() {
-        if (lista.Count == 0) return;
+        if (lista.Count == 0) { MessageBox.Show("Lista jest pusta!"); return; }
         string pulpit = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        string sciezka = Path.Combine(pulpit, "Kosztorys_Profesjonalny.html");
+        string sciezka = Path.Combine(pulpit, "Kosztorys.html");
 
         decimal totalNetto = lista.Sum(x => x.SumaNetto);
         decimal totalBrutto = lista.Sum(x => x.SumaBrutto);
 
-        string html = "<html><head><style>table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background-color:#f2f2f2;}</style></head><body>" +
+        string html = "<html><head><meta charset='UTF-8'><style>body{font-family:Arial;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:12px;text-align:left;} th{background-color:#4CAF50;color:white;}</style></head><body>" +
                       "<h1>Kosztorys Urządzeń</h1><p>Data: " + DateTime.Now.ToShortDateString() + "</p><table>" +
                       "<tr><th>Nazwa</th><th>Cena Netto</th><th>Ilość</th><th>Suma Netto</th><th>Suma Brutto</th></tr>";
 
         foreach (var u in lista) {
-            html += $"<tr><td>{u.Nazwa}</td><td>{u.CenaNetto}</td><td>{u.Ilosc}</td><td>{u.SumaNetto}</td><td>{u.SumaBrutto:F2}</td></tr>";
+            html += $"<tr><td>{u.Nazwa}</td><td>{u.CenaNetto} zł</td><td>{u.Ilosc}</td><td>{u.SumaNetto} zł</td><td>{u.SumaBrutto:F2} zł</td></tr>";
         }
 
-        html += $"</table><h3>Suma Netto: {totalNetto:F2} PLN</h3>" +
-                $"<h2>DO ZAPŁATY (BRUTTO): {totalBrutto:F2} PLN</h2>" +
-                "<p><i>Aby zapisać jako PDF: Naciśnij Ctrl+P w przeglądarce i wybierz 'Zapisz jako PDF'.</i></p></body></html>";
+        html += $"</table><div style='text-align:right;'><h3>Suma Netto: {totalNetto:F2} PLN</h3>" +
+                $"<h2>DO ZAPŁATY (BRUTTO): {totalBrutto:F2} PLN</h2></div>" +
+                "<p><i>Wskazówka: Naciśnij Ctrl+P i wybierz 'Zapisz jako PDF'.</i></p></body></html>";
 
         File.WriteAllText(sciezka, html);
-        MessageBox.Show("Plik wygenerowany na pulpicie! Otwórz go i zapisz jako PDF.");
+        MessageBox.Show("Kosztorys zapisany na pulpicie!");
     }
 
     [STAThread] static void Main() { Application.EnableVisualStyles(); Application.Run(new KosztorysApp()); }
